@@ -5,6 +5,7 @@ from esphome.const import CONF_ID
 
 CODEOWNERS = ["@limengdu"]
 DEPENDENCIES = ["uart"]
+AUTO_LOAD = ["sensor", "binary_sensor", "text_sensor"]
 MULTI_CONF = True
 
 mr60bha2_ns = cg.esphome_ns.namespace("seeed_mr60bha2")

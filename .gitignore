@@ -1,4 +1,9 @@
 .vscode
+.esphome/
+.tmp/
+.local/
+__pycache__/
+secrets.yaml
 
 build
 

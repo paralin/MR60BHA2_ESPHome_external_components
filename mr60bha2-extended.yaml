@@ -1,0 +1,129 @@
+substitutions:
+  name: "hemi-v-mr60bha2"
+  friendly_name: "Hemi-V MR60BHA2 Radar"
+
+esphome:
+  includes:
+    - xiao-antenna.h
+  on_boot:
+    priority: 700
+    then:
+      - lambda: configure_xiao_external_antenna();
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: "hemiv.mr60bha2_extended"
+    version: "2.3.0"
+  platformio_options:
+    board_upload.maximum_size: 4194304
+  min_version: "2026.8.0"
+
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  flash_size: 4MB
+  partitions: partitions.csv
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ seeed_mr60bha2 ]
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: INFO
+
+api:
+  batch_delay: 100ms
+  max_connections: 1
+  reboot_timeout: 0s
+  actions:
+    - action: radar_ack
+      variables:
+        boot: string
+        sequence: int
+      then:
+        - lambda: id(my_radar).acknowledge_frames(boot, sequence);
+
+ota:
+  - platform: esphome
+
+wifi:
+  power_save_mode: none
+  ap:
+    ssid: "hemi-v-mr60bha2"
+
+captive_portal:
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: led_ring
+    name: "RGB Light"
+    pin: GPIO1
+    num_leds: 1
+    rgb_order: GRB
+    chipset: ws2812
+
+i2c:
+  sda: GPIO22
+  scl: GPIO23
+  scan: true
+  id: bus_a
+
+uart:
+  id: uart_bus
+  baud_rate: 115200
+  rx_pin: 17
+  tx_pin: 16
+  parity: NONE
+  stop_bits: 1
+  rx_buffer_size: 2048
+
+seeed_mr60bha2:
+  id: my_radar
+
+text_sensor:
+  - platform: seeed_mr60bha2
+    frames:
+      name: "Radar Frames"
+    health:
+      name: "Radar Health"
+
+binary_sensor:
+  - platform: seeed_mr60bha2
+    has_target:
+      name: "Person Information"
+
+sensor:
+  - platform: bh1750
+    name: "Illuminance"
+    address: 0x23
+    update_interval: 1s
+  - platform: seeed_mr60bha2
+    breath_rate:
+      name: "Respiratory Rate"
+    heart_rate:
+      name: "Heart Rate"
+    distance:
+      name: "Distance"
+    num_targets:
+      name: "Target Number"
+    # Extended sensors
+    total_phase:
+      name: "Total Phase"
+    breath_phase:
+      name: "Breath Phase"
+    heart_phase:
+      name: "Heart Phase"
+    target_x:
+      name: "Target X"
+    target_y:
+      name: "Target Y"
+    target_doppler:
+      name: "Target Doppler"
+    motion_energy:
+      name: "Motion Energy"
